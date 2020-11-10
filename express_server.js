@@ -9,6 +9,24 @@ const urlDatabase= {
   "9sm5xK": "http://www.google.com"
 };
 
+const bodyParser = require("body-parser");
+app.use(bodyParser.urlencoded({extended: true}));
+
+function generateRandomString(keyLength) {
+  let i; 
+  let key = "";
+  let characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+  var charactersLength = characters.length;
+
+  for (i = 0; i < keyLength; i++) {
+      key += characters.substr(Math.floor((Math.random() * charactersLength) + 1), 1);
+  };
+
+  return key;
+};
+
+
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
@@ -26,10 +44,20 @@ app.get('/urls', (req, res) => {
   res.render('urls_index', templateVars);
 });
 
+app.get("/urls/new", (req, res) => {
+  res.render("urls_new");
+});
+
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = {shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL]};
   res.render("urls_show", templateVars);
 });
+
+app.post("/urls", (req, res) => {
+  console.log(req.body);
+  res.send("Ok");
+});
+
 
 app.listen(PORT, () => {
   console.log(`Example app listening on por ${PORT}!`);
