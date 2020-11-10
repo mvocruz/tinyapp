@@ -1,6 +1,7 @@
 const express = require("express");
 const app = express();
 const PORT = 8080;
+const { generateRandomString } = require("./generateRandomString")
 
 app.set("view engine", "ejs");
 
@@ -12,21 +13,7 @@ const urlDatabase= {
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 
-function generateRandomString(keyLength) {
-  let i; 
-  let key = "";
-  let characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-
-  var charactersLength = characters.length;
-
-  for (i = 0; i < keyLength; i++) {
-      key += characters.substr(Math.floor((Math.random() * charactersLength) + 1), 1);
-  };
-
-  return key;
-};
-
-
+//------Routing Handlers--------
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
