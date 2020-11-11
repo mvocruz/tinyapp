@@ -29,7 +29,14 @@ app.get("/urls/new", (req, res) => {
   const templateVars = {
     username: req.cookies["username"] 
   };
-  res.render("urls_new");
+  res.render("urls_new", username);
+});
+
+app.get("/register", (req, res) => {
+  const templateVars = {
+    username: req.cookies["username"] 
+  };
+  res.render("urls_register", templateVars);
 });
 
 app.post("/urls", (req, res) => {
