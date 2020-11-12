@@ -72,9 +72,26 @@ app.post("/register", (req, res) => {
 });
 
 //--------Login/Logout Handlers-------//
+app.get("/login", (req, res) => {
+  const id = req.cookies["user_id"];
+  const templateVars = {
+    user: users[id]
+    };
+  res.render("urls_login", templateVars);
+});
+
 app.post("/login", (req, res) => {
   const email = req.body.email;
+  const password = req.body.password;
   const user = getUserByEmail(email, users);
+
+  if (!user) {
+    return res.status(403).send('User not registered');
+  }
+  if (password !== user.password) {
+    return res.status(403).send('User/Password not correct');
+  }
+
   res.cookie("user_id", user.id);
   res.redirect("/urls");
 });
