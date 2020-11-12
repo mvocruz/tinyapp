@@ -30,9 +30,10 @@ res.render('urls_index', templateVars);
 });
 
 app.post("/urls", (req, res) => {
+  const id = req.cookies["user_id"];
   const longURL = req.body.longURL;
   const shortURL = generateRandomString(6); 
-  urlDatabase[shortURL] = longURL;
+  urlDatabase[shortURL] = { longURL, id };
   res.redirect(`/urls/${shortURL}`);
 });
 
@@ -42,6 +43,9 @@ app.get("/urls/new", (req, res) => {
   const templateVars = {
     user: users[id] 
   };
+  if (!id) {
+    res.redirect("/login");
+  }
   res.render("urls_new", templateVars);
 });
 
@@ -107,7 +111,8 @@ app.get("/urls/:shortURL", (req, res) => {
   const templateVars = {
     user: users[id],
     shortURL: req.params.shortURL, 
-    longURL: urlDatabase[req.params.shortURL]};
+    longURL: urlDatabase[req.params.shortURL].longURL}
+    // console.log(urlDatabase[req.params.shortURL])
   res.render("urls_show", templateVars);
 });
 
@@ -124,7 +129,7 @@ app.post("/urls/:shortURL/update", (req,res) => {
 
 //--------Short Link to Original URL-------//
 app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL];
+  const longURL = urlDatabase[req.params.shortURL].longURL;
   res.redirect(longURL); 
 });
 
