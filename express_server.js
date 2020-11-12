@@ -55,9 +55,17 @@ app.get("/register", (req, res) => {
 });
 
 app.post("/register", (req, res) => {
-  const id = generateRandomString(6); 
   const email = req.body.email;
   const password = req.body.password;
+  const checkUser = getUserByEmail(email, users);
+  
+  if(!email || !password) {
+    return res.status(400).send('E-mail or Password is not acceptable.Please try to register again.');
+  }
+  if (checkUser) {
+    return res.status(400).send('E-mail or Password already registered.Please try to register again.');
+  }
+  const id = generateRandomString(6); 
   users[id] = { id, email, password };
   res.cookie("user_id", id);
   res.redirect("/urls");
