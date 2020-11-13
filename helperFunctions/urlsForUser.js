@@ -6,7 +6,6 @@ const urlsForUser = (id,urlsDb) => {
       userUrls[shortURL] = urlsDb[shortURL];
     }
   }
-  console.log(userUrls)
   return userUrls;
 };
 

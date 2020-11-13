@@ -3,11 +3,14 @@ const app = express();
 const PORT = 8080;
 const { urlDatabase } = require("./url_database");
 const { users } = require("./users_database");
-const cookieParser = require('cookie-parser');
+const cookieSession = require('cookie-session');
 const bcrypt = require("bcrypt");
 
 app.set("view engine", "ejs");
-app.use(cookieParser());
+app.use(cookieSession({
+  name: 'session',
+  keys: ["key1"]
+}))
 
 const { generateRandomString } = require("./helperFunctions/generateRandomString");
 const { getUserByEmail } = require("./helperFunctions/getUserByEmail");
@@ -23,7 +26,7 @@ app.get("/urls.json", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  const userID = req.cookies["user_id"];
+  const userID = req.session.user_id;
   const longURL = req.body.longURL;
   const shortURL = generateRandomString(6); 
   urlDatabase[shortURL] = { longURL, userID };
@@ -33,7 +36,7 @@ app.post("/urls", (req, res) => {
 //------Create New URLs Handlers-----//
 
 app.get("/urls/new", (req, res) => {
-  const id = req.cookies["user_id"];
+  const id = req.session.user_id;
   const templateVars = {
     user: users[id] 
   };
@@ -47,7 +50,7 @@ app.get("/urls/new", (req, res) => {
 //-----Register Users Handlers -------//
 
 app.get("/register", (req, res) => {
-  const id = req.cookies["user_id"];
+  const id = req.session.user_id;
   const templateVars = {
     user: users[id]
   };
@@ -68,13 +71,13 @@ app.post("/register", (req, res) => {
   }
   const id = generateRandomString(6); 
   users[id] = { id, email, hashedPassword };
-  res.cookie("user_id", id);
+  req.session.user_id = id;
   res.redirect(`/urls`);
 });
 
 //--------Login/Logout Handlers-------//
 app.get("/login", (req, res) => {
-  const id = req.cookies["user_id"];
+  const id = req.session.user_id;
   const templateVars = {
     user: users[id]
   };
@@ -93,17 +96,17 @@ app.post("/login", (req, res) => {
     return res.status(403).send('User/Password not correct');
   }
   
-  res.cookie("user_id", user.id);
+  req.session.user_id = user.id;
   res.redirect(`/urls`);
 });
 
 app.post("/logout", (req,res) => {
-  res.clearCookie("user_id");
+  req.session = null;
   res.redirect("/urls");
 });
 
 app.get('/urls', (req, res) => {
-  const id = req.cookies["user_id"];
+  const id = req.session.user_id;
   const checkID = urlsForUser(id, urlDatabase);
   const templateVars = {
     urls: checkID,
@@ -120,7 +123,7 @@ app.get('/urls', (req, res) => {
 
 //--Utilities (view, delete and update) Handlers--//
 app.get("/urls/:shortURL", (req, res) => {
-  const id = req.cookies["user_id"];
+  const id = req.session.user_id;
   const templateVars = {
     user: users[id],
     shortURL: req.params.shortURL, 
@@ -130,13 +133,13 @@ app.get("/urls/:shortURL", (req, res) => {
   });
   
   app.post("/urls/:shortURL/delete", (req,res) => {
-    const id = req.cookies["user_id"];
+    const id = req.session.user_id;
     delete urlDatabase[req.params.shortURL];
     res.redirect(`/urls`);
   });
 
 app.post("/urls/:shortURL/update", (req,res) => {
-  const userID = req.cookies["user_id"];
+  const userID = req.session.user_id;
   const longURL = req.body.longURL;
   urlDatabase[req.params.shortURL] = { longURL, userID };
   res.redirect(`/urls/${req.params.shortURL}`);
