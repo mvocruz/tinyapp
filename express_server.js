@@ -4,6 +4,7 @@ const PORT = 8080;
 const { urlDatabase } = require("./url_database");
 const { users } = require("./users_database");
 const cookieParser = require('cookie-parser');
+const bcrypt = require("bcrypt");
 
 app.set("view engine", "ejs");
 app.use(cookieParser());
@@ -56,6 +57,7 @@ app.get("/register", (req, res) => {
 app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
+  const hashedPassword = bcrypt.hashSync(password, 10);
   const checkUser = getUserByEmail(email, users);
   
   if(!email || !password) {
@@ -65,7 +67,7 @@ app.post("/register", (req, res) => {
     return res.status(400).send('E-mail or Password already registered.Please try to register again.');
   }
   const id = generateRandomString(6); 
-  users[id] = { id, email, password };
+  users[id] = { id, email, hashedPassword };
   res.cookie("user_id", id);
   res.redirect(`/urls`);
 });
@@ -87,7 +89,7 @@ app.post("/login", (req, res) => {
   if (!user) {
     return res.status(403).send('User not registered');
   }
-  if (password !== user.password) {
+  if (bcrypt.compareSync(password, user.hashedPassword) === false) {
     return res.status(403).send('User/Password not correct');
   }
   
