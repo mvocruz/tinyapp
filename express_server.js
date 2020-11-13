@@ -10,7 +10,7 @@ app.set("view engine", "ejs");
 app.use(cookieSession({
   name: 'session',
   keys: ["key1"]
-}))
+}));
 
 const { generateRandomString } = require("./helperFunctions/generateRandomString");
 const { getUserByEmail } = require("./helperFunctions/getUserByEmail");
@@ -111,7 +111,7 @@ app.get('/urls', (req, res) => {
   const templateVars = {
     urls: checkID,
     user: users[id]
-};
+  };
   if (!id) {
      
     res.render('urls_index', templateVars);
@@ -127,7 +127,7 @@ app.get("/urls/:shortURL", (req, res) => {
   const templateVars = {
     user: users[id],
     shortURL: req.params.shortURL, 
-    longURL: urlDatabase[req.params.shortURL].longURL}
+    longURL: urlDatabase[req.params.shortURL].longURL};
 
     res.render("urls_show", templateVars);
   });
