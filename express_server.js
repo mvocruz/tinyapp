@@ -4,8 +4,7 @@ const PORT = 8080;
 const { urlDatabase } = require("./url_database");
 const { users } = require("./users_database");
 const cookieSession = require('cookie-session');
-const bcrypt = require("bcrypt");
-
+const bcrypt = require("bcryptjs");
 app.set("view engine", "ejs");
 app.use(cookieSession({
   name: 'session',
@@ -124,12 +123,24 @@ app.get('/urls', (req, res) => {
 //--Utilities (view, delete and update) Handlers--//
 app.get("/urls/:shortURL", (req, res) => {
   const id = req.session.user_id;
-  const templateVars = {
-    user: users[id],
-    shortURL: req.params.shortURL, 
-    longURL: urlDatabase[req.params.shortURL].longURL};
+  const urlShort = req.params.shortURL;
 
-    res.render("urls_show", templateVars);
+  if (!id) {
+    return res.status(401).send('User/Password not authorized to access this page');
+  }
+
+  if (id === urlDatabase[urlShort].userID) {
+    const templateVars = {
+      user: users[id],
+      shortURL: urlShort, 
+      longURL: urlDatabase[urlShort].longURL};
+      
+      res.render("urls_show", templateVars);
+      } else {
+
+      return res.status(401).send('User/Password not authorized to access this page');
+      
+    }
   });
   
   app.post("/urls/:shortURL/delete", (req,res) => {
